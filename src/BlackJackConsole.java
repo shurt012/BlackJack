@@ -11,9 +11,11 @@ public class BlackJackConsole
 
     private static Scanner scanner = new Scanner(System.in);
     private int[] deck;   // An array of 52 Cards, representing the deck.
+    private int[] totalDeck;
     private int currentPosition; // Current position in the deck
     private Vector hand;   // The cards in the hand.
-
+    private int numOfDecks = 6; // Number of decks to be used.
+    
     public static void main(String[] args)
     {
         new BlackJackConsole().run();
@@ -86,18 +88,25 @@ public class BlackJackConsole
 
         Vector dealerHand;   // The dealer's hand.
         Vector userHand;     // The user's hand.
-
+        
+        totalDeck = new int[52 * numOfDecks];
+        
         // Create an unshuffled deck of cards.
-        deck = new int[52];
         int cardCt = 0; // How many cards have been created so far.
-        for (int suit = 0; suit <= 3; suit++)
+        for(int i = 0; i < numOfDecks; i++)
         {
-            for (int value = 1; value <= 13; value++)
-            {
-                deck[cardCt] = value;
-                cardCt++;
-            }
+        	//deck = new int[52];
+        	for (int suit = 0; suit <= 3; suit++)
+        	{
+        		for (int value = 1; value <= 13; value++)
+        		{
+        			//deck[cardCt] = value;
+        			totalDeck[cardCt] = value;
+        			cardCt++;
+        		}
+        	}
         }
+   
         currentPosition = 0;
 
         dealerHand = new Vector();
@@ -246,24 +255,24 @@ public class BlackJackConsole
     public int dealCard()
     {
         // Deals one card from the deck and returns it.
-        if (currentPosition == 52)
+        if (currentPosition == (52 * numOfDecks - 1))
         {
             shuffle();
         }
         currentPosition++;
-        return deck[currentPosition - 1];
+        return totalDeck[currentPosition - 1];
     }
 
     public void shuffle()
     {
         // Put all the used cards back into the deck, and shuffle it into
         // a random order.
-        for (int i = 51; i > 0; i--)
+        for (int i = (52 * numOfDecks - 1); i > 0; i--)
         {
             int rand = (int) (Math.random() * (i + 1));
-            int temp = deck[i];
-            deck[i] = deck[rand];
-            deck[rand] = temp;
+            int temp = totalDeck[i];
+            totalDeck[i] = totalDeck[rand];
+            totalDeck[rand] = temp;
         }
         currentPosition = 0;
     }

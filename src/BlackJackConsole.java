@@ -1,3 +1,6 @@
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -5,17 +8,21 @@ import java.util.Vector;
 using ConsoleApplet as a basis.  See the file
 ConsoleApplet.java for more information.
 
-*/
+ */
 public class BlackJackConsole
 {
 
     private static Scanner scanner = new Scanner(System.in);
+    private String move;
     private int[] deck;   // An array of 52 Cards, representing the deck.
     private int[] totalDeck;
     private int currentPosition; // Current position in the deck
-    private Vector hand;   // The cards in the hand.
+    private Vector dealerHand, userHand;   // The cards in the hand.
     private int numOfDecks = 6; // Number of decks to be used.
-    
+    private List<Vector> computerPlayers = new ArrayList<Vector>();
+    private List<Integer> blackjackWinners = new ArrayList<>();
+    private List<Integer> winners = new ArrayList<>();
+
     public static void main(String[] args)
     {
         new BlackJackConsole().run();
@@ -33,52 +40,49 @@ public class BlackJackConsole
         and stands on a total of 17 or more.  Dealer wins ties.
         A new deck of cards is used for each game.
          */
-
-        int money;          // Amount of money the user has.
-        int bet;            // Amount user bets on a game.
+        // int money;          // Amount of money the user has.
+        // int bet;            // Amount user bets on a game.
         boolean userWins;   // Did the user win the game?
 
         System.out.println("Welcome to the game of blackjack.");
         System.out.println();
+        playBlackjack();
 
-        money = 100;  // User starts with $100.
-
-        while (true)
-        {
-            System.out.println("You have " + money + " dollars.");
-            do
-            {
-                System.out.println("How many dollars do you want to bet?  (Enter 0 to end.)");
-                System.out.print("? ");
-                bet = scanner.nextInt();
-                if (bet < 0 || bet > money)
-                {
-                    System.out.println("Your answer must be between 0 and " + money + '.');
-                }
-            } while (bet < 0 || bet > money);
-            if (bet == 0)
-            {
-                break;
-            }
-            userWins = playBlackjack();
-            if (userWins)
-            {
-                money = money + bet;
-            } else
-            {
-                money = money - bet;
-            }
-            System.out.println();
-            if (money == 0)
-            {
-                System.out.println("Looks like you've are out of money!");
-                break;
-            }
-        }
-
-        System.out.println();
-        System.out.println("You leave with $" + money + '.');
-
+        //money = 100;  // User starts with $100.
+//        while (true)
+//        {
+//            System.out.println("You have " + money + " dollars.");
+//            do
+//            {
+//                System.out.println("How many dollars do you want to bet?  (Enter 0 to end.)");
+//                System.out.print("? ");
+//                bet = scanner.nextInt();
+//                if (bet < 0 || bet > money)
+//                {
+//                    System.out.println("Your answer must be between 0 and " + money + '.');
+//                }
+//            } while (bet < 0 || bet > money);
+//            if (bet == 0)
+//            {
+//                break;
+//            }
+//            userWins = playBlackjack();
+//            if (userWins)
+//            {
+//                money = money + bet;
+//            } else
+//            {
+//                money = money - bet;
+//            }
+//            System.out.println();
+//            if (money == 0)
+//            {
+//                System.out.println("Looks like you've are out of money!");
+//                break;
+//            }
+//        }
+//        System.out.println();
+//        System.out.println("You leave with $" + money + '.');
     } // end main()
 
     private boolean playBlackjack()
@@ -86,89 +90,74 @@ public class BlackJackConsole
         // Let the user play one game of Blackjack.
         // Return true if the user wins, false if the user loses.
 
-        Vector dealerHand;   // The dealer's hand.
-        Vector userHand;     // The user's hand.
-        
         totalDeck = new int[52 * numOfDecks];
-        
+
+        //List of computer players
+        int numCompPlayers = 12;  //Number of computer players
+
+        for (int i = 0; i < numCompPlayers; i++)
+        {
+            computerPlayers.add(new Vector());
+        }
+
         // Create an unshuffled deck of cards.
         int cardCt = 0; // How many cards have been created so far.
-        for(int i = 0; i < numOfDecks; i++)
+        for (int i = 0; i < numOfDecks; i++)
         {
-        	//deck = new int[52];
-        	for (int suit = 0; suit <= 3; suit++)
-        	{
-        		for (int value = 1; value <= 13; value++)
-        		{
-        			//deck[cardCt] = value;
-        			totalDeck[cardCt] = value;
-        			cardCt++;
-        		}
-        	}
+            //deck = new int[52];
+            for (int suit = 0; suit <= 3; suit++)
+            {
+                for (int value = 1; value <= 13; value++)
+                {
+                    //deck[cardCt] = value;
+                    totalDeck[cardCt] = value;
+                    cardCt++;
+                }
+            }
         }
-   
+
         currentPosition = 0;
 
         dealerHand = new Vector();
         userHand = new Vector();
 
         /*  Shuffle the deck, then deal two cards to each player. */
-
         shuffle();
+        deal();
+        deal();
 
-        dealerHand.addElement(dealCard());
-        dealerHand.addElement(dealCard());
-        userHand.addElement(dealCard());
-        userHand.addElement(dealCard());
-
-        System.out.println();
-        System.out.println();
-
-        /* Check if one of the players has Blackjack (two cards totaling to 21).
-        The player with Blackjack wins the game.  Dealer wins ties.
-         */
-
-        if (value(dealerHand) == 21)
-        {
-            System.out.println("Dealer has the " + showCard(getCard(dealerHand, 0)) + " and the " + showCard(getCard(dealerHand, 1)) + ".");
-            System.out.println("User has the " + showCard(getCard(userHand, 0)) + " and the " + showCard(getCard(userHand, 1)) + ".");
-            System.out.println();
-            System.out.println("Dealer has Blackjack.  Dealer wins.");
-            return false;
-        }
-
-        if (value(userHand) == 21)
-        {
-            System.out.println("Dealer has the " + showCard(getCard(dealerHand, 0)) + " and the " + showCard(getCard(dealerHand, 1)) + ".");
-            System.out.println("User has the " + showCard(getCard(userHand, 0)) + " and the " + showCard(getCard(userHand, 1)) + ".");
-            System.out.println();
-            System.out.println("You have Blackjack.  You win.");
-            return true;
-        }
+        printComputerPlayerHand();
 
         /*  If neither player has Blackjack, play the game.  The user gets a chance
         to draw cards (i.e., to "Hit").  The while loop ends when the user
         chooses to "Stand" or when the user goes over 21.
          */
-
         while (true)
         {
 
             /* Display user's cards, and let user decide to Hit or Stand. */
-
-            System.out.println();
-            System.out.println();
-            System.out.println("Your cards are:");
+            System.out.println("\nYour cards are:\n");
             for (int i = 0; i < userHand.size(); i++)
             {
                 System.out.println("    " + showCard(getCard(userHand, i)));
             }
-            System.out.println("Your total is " + value(userHand));
+            System.out.println("\nYour total is " + value(userHand));
+            System.out.println("\nDealer is showing the " + showCard(getCard(dealerHand, 0)));
             System.out.println();
-            System.out.println("Dealer is showing the " + showCard(getCard(dealerHand, 0)));
-            System.out.println();
+
+            //check deal blackjack
+            if (checkDealerHasBlackjack())
+            {
+                return false;
+            }
+            else if (value(userHand) == 21 && userHand.size() == 2)
+            {
+                System.out.println("You have Blackjack.  You win.");
+                break;
+            }
             System.out.print("Hit (H) or Stand (S)? ");
             char userAction;  // User's response, 'H' or 'S'.
+
             do
             {
                 userAction = Character.toUpperCase(scanner.next().charAt(0));
@@ -176,17 +165,20 @@ public class BlackJackConsole
                 {
                     System.out.print("Please respond H or S:  ");
                 }
-            } while (userAction != 'H' && userAction != 'S');
+            }
+            while (userAction != 'H' && userAction != 'S');
 
             /* If the user Hits, the user gets a card.  If the user Stands, the
             dealer gets a chance to draw and the game ends.
              */
-
             if (userAction == 'S')
             {
                 // Loop ends; user is done taking cards.
+                System.out.println();
+                System.out.println("User stands.\n");
                 break;
-            } else
+            }
+            else
             {  // userAction is 'H'.
                 // Give the user a card.  If the user goes over 21, the user loses.
                 int newCard = dealCard();
@@ -198,9 +190,8 @@ public class BlackJackConsole
                 if (value(userHand) > 21)
                 {
                     System.out.println();
-                    System.out.println("You busted by going over 21.  You lose.");
-                    System.out.println("Dealer's other card was the " + showCard(getCard(dealerHand, 1)));
-                    return false;
+                    System.out.println("You busted by going over 21. You lose.\n");
+                    break;
                 }
             }
 
@@ -209,48 +200,241 @@ public class BlackJackConsole
         /* If we get to this point, the user has Stood with 21 or less.  Now, it's
         the dealer's chance to draw.  Dealer draws cards until the dealer's total is > 16.
          */
-
-        System.out.println();
-        System.out.println("User stands.");
-        System.out.println("Dealer's cards are");
-        System.out.println("    " + showCard(getCard(dealerHand, 0)));
-        System.out.println("    " + showCard(getCard(dealerHand, 1)));
-        while (value(dealerHand) <= 16)
+        for (int i = 0; i < computerPlayers.size(); i++)
         {
-            int newCard = dealCard();
-            System.out.println("Dealer hits and gets the " + showCard(newCard));
-            dealerHand.addElement(newCard);
+            if (value(computerPlayers.get(i)) != 21)
+            {
+                BasicStrat bs = new BasicStrat(showCard(getCard(computerPlayers.get(i), 0)), showCard(getCard(computerPlayers.get(i), 1)), showCard(getCard(dealerHand, 0)));
+                move = bs.move(computerPlayers.get(i).size(), value(computerPlayers.get(i)));
+                while (move.equals("H"))
+                {
+
+                    int newCard = dealCard();
+                    //System.out.println("Computer #" + (i + 1) + " hits and gets the " + showCard(newCard));
+                    computerPlayers.get(i).addElement(newCard);
+                    move = bs.move(computerPlayers.get(i).size(), value(computerPlayers.get(i)));
+
+                }
+                /*
+                if (value(players.get(i)) > 21)
+                {
+                    System.out.println("Computer #" + (i + 1) + " busted by going over 21." + " Computer #" + (i + 1) + " lost.");
+                }
+                else
+                {
+                    System.out.println("Computer #" + (i + 1) + " stands\n\n");
+
+                }
+                System.out.println("Computer #" + (i + 1) + "'s final total is " + value(players.get(i)));
+                System.out.println();
+                 */
+            }
+            else
+            {
+                blackjackWinners.add(i + 1);
+
+            }
+
         }
-        System.out.println("Dealer's total is " + value(dealerHand));
+        printComputerPlayerHand();
+        dealersTurn();
 
         /* Now, the winner can be declared. */
-
         System.out.println();
-        if (value(dealerHand) > 21)
+
+        //checks to see the computer players that beat the dealer
+        for (int i = 0; i < computerPlayers.size(); i++)
         {
-            System.out.println("Dealer busted by going over 21.  You win.");
-            return true;
-        } else
+
+            if (value(computerPlayers.get(i)) <= 21)
+            {
+                if (value(dealerHand) > 21)
+                {
+
+                    winners.add(i + 1);
+                }
+                else if ((value(computerPlayers.get(i)) > value(dealerHand)))
+                {
+
+                    winners.add(i + 1);
+                }
+            }
+
+        }
+
+        //prints out the winning computer players, N/A if none
+        System.out.print("\nComputer Winners: ");
+        if (winners.isEmpty())
         {
-            if (value(dealerHand) == value(userHand))
+            System.out.print("N/A");
+        }
+        else
+        {
+            for (int i = 0; i < winners.size(); i++)
             {
-                System.out.println("Dealer wins on a tie.  You lose.");
-                return false;
-            } else
-            {
-                if (value(dealerHand) > value(userHand))
+                if (i == winners.size() - 1)
                 {
-                    System.out.println("Dealer wins, " + value(dealerHand) + " points to " + value(userHand) + ".");
-                    return false;
-                } else
+                    System.out.print((winners.get(i)));
+                }
+                else
                 {
-                    System.out.println("You win, " + value(userHand) + " points to " + value(dealerHand) + ".");
-                    return true;
+                    System.out.print(winners.get(i) + ", ");
                 }
             }
         }
+        System.out.println();
 
+        System.out.print("\nBlackjack Computer Winners: ");
+        if (blackjackWinners.isEmpty())
+        {
+            System.out.print("N/A");
+        }
+        else
+        {
+            for (int i = 0; i < blackjackWinners.size(); i++)
+            {
+                if (i == blackjackWinners.size() - 1)
+                {
+                    System.out.print((blackjackWinners.get(i)));
+                }
+                else
+                {
+                    System.out.print(blackjackWinners.get(i) + ", ");
+                }
+            }
+        }
+        System.out.println();
+        System.out.println();
+
+        if (value(userHand) < 21)
+        {
+
+            if (value(dealerHand) > 21)
+            {
+                System.out.println("Dealer busted by going over 21.  You win.");
+                return true;
+            }
+            else
+            {
+                if (value(dealerHand) == value(userHand))
+                {
+                    System.out.println("Push");
+                    return false;
+                }
+                else
+                {
+                    if (value(dealerHand) > value(userHand))
+                    {
+                        System.out.println("Dealer wins, " + value(dealerHand) + " points to " + value(userHand) + ".");
+                        return false;
+                    }
+                    else
+                    {
+                        System.out.println("You win, " + value(userHand) + " points to " + value(dealerHand) + ".");
+                        return true;
+                    }
+                }
+            }
+
+        }
+        return false;
     }  // end playBlackjack()
+
+    public void dealersTurn()
+    {
+        System.out.println("\nDealer's cards are\n");
+        System.out.println("    " + showCard(getCard(dealerHand, 0)));
+        System.out.println("    " + showCard(getCard(dealerHand, 1)));
+        System.out.println("\nDealer's total is " + value(dealerHand));
+
+        while (value(dealerHand) < 17)
+        {
+            int newCard = dealCard();
+            System.out.println("\nDealer hits and gets the " + showCard(newCard));
+            dealerHand.addElement(newCard);
+            System.out.println("\nDealer's cards are\n");
+            for (int i = 0; i < dealerHand.size(); i++)
+            {
+                System.out.println("    " + showCard(getCard(dealerHand, i)));
+
+            }
+            System.out.println("\nDealer's total is " + value(dealerHand));
+        }
+
+    }
+
+    public void deal()
+    {
+        userHand.addElement(dealCard());
+        for (int i = 0; i < computerPlayers.size(); i++)
+        {
+            computerPlayers.get(i).addElement(dealCard());
+
+        }
+        dealerHand.addElement(dealCard());
+    }
+
+    public boolean checkDealerHasBlackjack()
+    {
+        if (showCard(getCard(dealerHand, 0)).equals("Ace") && value(dealerHand) == 21)
+        {
+            System.out.println("Dealer has the " + showCard(getCard(dealerHand, 0)) + " and the " + showCard(getCard(dealerHand, 1)) + ".");
+            // System.out.println("Computer #" + (i+1) + " has the " + showCard(getCard(cxomputerPlayers, 0)));
+            System.out.println();
+            if (value(userHand) == 21)
+            {
+                System.out.println("Dealer and You have Blackjack. It's a push!");
+            }
+            else
+            {
+                System.out.println("Dealer has Blackjack. Dealer wins.");
+            }
+
+            for (int i = 0; i < computerPlayers.size(); i++)
+            {
+                if (value(computerPlayers.get(i)) == 21)
+                {
+                    System.out.println("Dealer and Computer #" + (i + 1) + " have Blackjack. It's a push!");
+                }
+                else
+                {
+                    System.out.println("Dealer has Blackjack. Dealer beats Computer #" + (i + 1));
+                }
+            }
+
+            return true;
+
+        }
+        return false;
+    }
+
+    public void printComputerPlayerHand()
+    {
+
+        System.out.printf("%s %14s %16s", "Player", "Total", "Cards\n");
+        System.out.println("-------------------------------------------------------\n");
+        for (int i = 0; i < computerPlayers.size(); i++)
+        {
+            System.out.printf("%d\t\t", i + 1);
+            System.out.printf("%d\t\t", value(computerPlayers.get(i)));
+    
+            
+            for (int j = 0; j < computerPlayers.get(i).size(); j++)
+            {
+                if (j == computerPlayers.get(i).size() - 1)
+                {
+                    System.out.printf("%s\t\t", showCard(getCard(computerPlayers.get(i), j)));
+                }
+                else
+                {
+                    System.out.printf("%s, ", showCard(getCard(computerPlayers.get(i), j)));
+                }
+            }
+            System.out.println("");
+            
+        }
+        System.out.println("\n-------------------------------------------------------");
+    }
 
     public int dealCard()
     {
@@ -285,8 +469,9 @@ public class BlackJackConsole
         // is returned.
         if (position >= 0 && position < hand.size())
         {
-            return ((Integer)hand.elementAt(position)).intValue();
-        } else
+            return ((Integer) hand.elementAt(position)).intValue();
+        }
+        else
         {
             return 0;
         }
@@ -328,7 +513,6 @@ public class BlackJackConsole
         // If there is an ace, and if changing its value from 1 to
         // 11 would leave the score less than or equal to 21,
         // then do so by adding the extra 10 points to val.
-
         if (ace == true && val + 10 <= 21)
         {
             val = val + 10;
@@ -337,6 +521,7 @@ public class BlackJackConsole
         return val;
 
     }
+
     public int getCardValue(int card)
     {
         int result = card;
@@ -345,10 +530,11 @@ public class BlackJackConsole
             case 11:
             case 12:
             case 13:
-                result =  10;
+                result = 10;
         }
         return result;
     }
+
     public String showCard(int card)
     {
         switch (card)

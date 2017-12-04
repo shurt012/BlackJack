@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package blackjackconsole;
+
 
 
 
 
 /**
  *
- * @author cristiancepeda
+ * @author Hornets
  */
 public class BasicStrat {
 

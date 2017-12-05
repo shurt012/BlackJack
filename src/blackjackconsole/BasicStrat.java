@@ -10,7 +10,7 @@ package blackjackconsole;
 
 /**
  *
- * @author cristiancepeda
+ * @author Hornets
  */
 public class BasicStrat {
 

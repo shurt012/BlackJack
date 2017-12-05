@@ -12,7 +12,7 @@ import java.util.Vector;
 
 /**
 *
-* @author cristiancepeda
+* @author Hornets
 */
 public class BlackJackConsole {
   private static Scanner scanner = new Scanner(System.in);
@@ -22,6 +22,11 @@ public class BlackJackConsole {
   private int currentPosition;   // Current position in the deck
   private Vector dealerHand, userHand;     // The cards in the hand.
   private int numOfDecks = 6;   // Number of decks to be used.
+
+  private int numOfDeals = 0; // The number of times the dealer has gone around the table giving cards out.
+  private int totalCardCount = 0; // the count of cards of the table as each card is being handed out.
+  private int dealersCardCount = 0;
+
   private List<Vector> computerPlayers = new ArrayList<Vector>();
   private List<Integer> blackjackWinners = new ArrayList<>();
   private List<Integer> winners = new ArrayList<>();
@@ -53,7 +58,7 @@ public class BlackJackConsole {
 
     totalDeck = new int[52 * numOfDecks];
 
-    //List of computer players
+    // List of computer players
     int numCompPlayers = 12; //Number of computer players
 
     for (int numberOfComputersAdded = 0; numberOfComputersAdded < numCompPlayers; numberOfComputersAdded++) {
@@ -109,10 +114,14 @@ public class BlackJackConsole {
       the dealer gets his cards
     *************************************************************************/
     dealPlayer();
+    numOfDeals++;
     dealPlayer();
-    dealDealer();
-
+    /******************************/
     printComputerPlayerHand();
+    System.out.println("2-6=+1 ....... 7-9=0 ....... 10-ACE=-1");
+    System.out.print("THIS SHOULD BE THE CARD COUNT ONCE PLAYERS HAVE TWO CARDS: ");
+    System.out.println(totalCardCount);
+    dealDealer();
 
     /*  If neither player has Blackjack, play the game.  The user gets a chance
     to draw cards (i.e., to "Hit").  The while loop ends when the user
@@ -121,13 +130,18 @@ public class BlackJackConsole {
 
 /***************** LOGIC FOR USER HIT OR STAND OF PLAYER *********************/
     while (true) {
-      System.out.println("Dealer is showing the " + showCard(getCard(dealerHand, 0)));
+
       /* Display user's cards, and let user decide to Hit or Stand. */
       System.out.print("Your cards are:");
       for (int i = 0; i < userHand.size(); i++) {
         System.out.print("  " + showCard(getCard(userHand, i)));
       }
       System.out.println("\nYour total is " + value(userHand));
+      System.out.println();
+
+      System.out.println("Dealer is showing the " + showCard(getCard(dealerHand, 0)));
+      System.out.print("THIS SHOULD BE THE CARD COUNT AFTER SEEING DEALER UPER CARD: ");
+      System.out.println(totalCardCount);
       System.out.println();
 
       //check deal blackjack
@@ -153,6 +167,8 @@ public class BlackJackConsole {
       if (userAction == 'S') {
         // Loop ends; user is done taking cards.
         System.out.println();
+        // just incase the user hits then you would want to reset this to index 1 meaning the second card
+        this.numOfDeals = 1;
         System.out.println("User stands.\n");
         break;
       } else {
@@ -160,6 +176,8 @@ public class BlackJackConsole {
         // Give the user a card.  If the user goes over 21, the user loses.
         int newCard = dealCard();
         userHand.addElement(newCard);
+        numOfDeals++;
+        setCardCount(getCard(userHand,this.numOfDeals));
         System.out.println();
         System.out.println("User hits.");
         System.out.println("\nYour card is the " + showCard(newCard));
@@ -184,10 +202,19 @@ public class BlackJackConsole {
         BasicStrat bs = new BasicStrat(showCard(getCard(computerPlayers.get(i), 0)), showCard(getCard(computerPlayers.get(i), 1)), showCard(getCard(dealerHand, 0)));
         // THE VARIABLE move HERE IS A STRING
         move = bs.move(computerPlayers.get(i).size(), value(computerPlayers.get(i)));
+        if (move.equals("S")){
+          // You want to reset this so that the index for the next player can be on the correct card
+          this.numOfDeals = 1;
+        }
         while (move.equals("H")) {
           int newCard = dealCard();
           //System.out.println("Computer #" + (i + 1) + " hits and gets the " + showCard(newCard));
           computerPlayers.get(i).addElement(newCard);
+          numOfDeals++;
+          setCardCount(getCard(computerPlayers.get(i),this.numOfDeals));
+          System.out.println("The computer on is: " + (i + 1));
+          System.out.println("number of deals: " + numOfDeals);
+          System.out.println("total count: " + totalCardCount);
           move = bs.move(computerPlayers.get(i).size(), value(computerPlayers.get(i)));
         }
       } else {
@@ -196,7 +223,11 @@ public class BlackJackConsole {
     }
 /********** END OF LOGIC FOR COMPUTER HIT OR STAND OF PLAYER ***************/
 
+    // Display the new hands of the computers to see if they hit or stand
     printComputerPlayerHand();
+    System.out.print("THIS SHOULD BE THE CARD COUNT AFTER SEEING IF PLAYERS HIT EXTRA CARDS AND DEALER UPER CARD ONLY: ");
+    //totalCardCount += cardCounter(userHand);
+    System.out.println(totalCardCount);
 
     dealersTurn();
 
@@ -243,6 +274,11 @@ public class BlackJackConsole {
     }
     System.out.println();
     System.out.println();
+    /********************/
+    System.out.println(" 2-6 = +1 ....... 7-9 = 0 ....... 10-ACE = -1");
+    System.out.print("THIS SHOULD BE THE CARD COUNT: ");
+    //totalCardCount += cardCounter(userHand);
+    System.out.println(totalCardCount);
 
     if (value(userHand) < 21) {
       if (value(dealerHand) > 21) {
@@ -287,12 +323,19 @@ public class BlackJackConsole {
 
   public void dealPlayer() {
     userHand.addElement(dealCard());
+    setCardCount(getCard(userHand,this.numOfDeals));
+
     for (int i = 0; i < computerPlayers.size(); i++) {
       computerPlayers.get(i).addElement(dealCard());
+      setCardCount(getCard(computerPlayers.get(i),this.numOfDeals));
+
+      // What we had in class
+      // totalCardCount += cardCounter(computerPlayers.get(i));
     }
   }
   public void dealDealer(){
     dealerHand.addElement(dealCard());
+    setCardCount(getCard(dealerHand,0));
     dealerHand.addElement(dealCard());
   }
   public int dealCard() {
@@ -306,7 +349,7 @@ public class BlackJackConsole {
   }
 
   public void printComputerPlayerHand() {
-    System.out.printf("%s %14s %16s", "Player", "Total", "Cards\n");
+    System.out.printf("%s %14s %16s %18s", "Player", "Total", "Cards", "CardCount\n");
     System.out.println("-------------------------------------------------------\n");
     for (int i = 0; i < computerPlayers.size(); i++) {
       System.out.printf("%d\t\t", i + 1);
@@ -319,6 +362,8 @@ public class BlackJackConsole {
           System.out.printf("%s, ", showCard(getCard(computerPlayers.get(i), j)));
         }
       }
+      // ADDED THIS IN HOPE THAT IT WOULD PRINT EACH PLAYER TOTAL CARD AS THEY GOT THERE CARDS
+      //System.out.println(totalCardCount);
       System.out.println("");
     }
     System.out.println("\n-------------------------------------------------------");
@@ -381,7 +426,7 @@ public class BlackJackConsole {
       return "??";
     }
   }
-  public int getCard(Vector hand, int position) {
+  public static int getCard(Vector hand, int position) {
     // Get the card from the hand in given position, where positions
     // are numbered starting from 0.  If the specified position is
     // not the position number of a card in the hand, then null
@@ -396,7 +441,7 @@ public class BlackJackConsole {
     }
   }
 
-  public int value(Vector hand) {
+  public static int value(Vector hand) {
     // Returns the value of this hand for the
     // game of Blackjack.
 
@@ -434,7 +479,7 @@ public class BlackJackConsole {
     }
     return val;
   }
-  public int getCardValue(int card) {
+  public static int getCardValue(int card) {
     int result = card;
     switch (card)
     {
@@ -444,6 +489,21 @@ public class BlackJackConsole {
       result = 10;
     }
     return result;
+  }
+
+  // The card counter should be updated as each card is being handed out.
+  // Here we are assuming that each player will only stay with 2 cards.
+  public void setCardCount (int card){
+    int cardValue = getCardValue(card);
+
+    // 2-6 = +1
+    // 7-9 = 0
+    // 10-ACE = -1
+    if (cardValue >= 2 && cardValue <= 6) {
+        this.totalCardCount++;
+    } else if (cardValue >= 10 || cardValue == 1) {
+        this.totalCardCount--;
+    }
   }
 
   public void dealersTurn() {

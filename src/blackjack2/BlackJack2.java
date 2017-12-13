@@ -31,6 +31,7 @@ import java.util.ArrayList;
      private final String TYPE_OF_PLAYER;
      private Vector userHand = new Vector();
      private int CardCount = 0;
+     private int numberOfDeals = 2;
 
      // Variable needed to getCard
      private final int PLAYER_NUMBER;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
        PLAYER_NUMBER = playerNumber;
        NUM_OF_PLAYERS =numberOfPlayers;
        TYPE_OF_PLAYER = type;
+       //System.out.println("Creating Player " +  playerNumber );
      }
 
      /* Essentially run will be the method playBlackJack()
@@ -53,12 +55,16 @@ import java.util.ArrayList;
          getCards(PLAYER_NUMBER,NUM_OF_PLAYERS);
          setCardCount();
          //System.out.println("Player Number: " + (PLAYER_NUMBER+1) + " card 1: " + showCard((Integer)userHand.elementAt(0)) + " card 2: "+ showCard((Integer)userHand.elementAt(1)));
-         Thread.sleep(0); // 1 SECOND = 1000 MILLISECONDS
+         Thread.sleep(50); // 1 SECOND = 1000 MILLISECONDS
        } catch(InterruptedException e){
-         System.out.println("Player Number: " + (PLAYER_NUMBER+1) + " interrupted.");
+         //System.out.println("Player Number: " + (PLAYER_NUMBER+1) + " interrupted.");
        } // END CATCH
        //System.out.println("Player Number: " + (PLAYER_NUMBER+1) + " done playing.");
      } // END OF RUN() FUNCTION
+     public int setUserDeals(int number){
+         numberOfDeals = numberOfDeals + number;
+         return numberOfDeals;
+     }
      public Vector getUserHand(){
        return userHand;
      } // END OF getUserHand() FUNCTION
@@ -79,6 +85,7 @@ import java.util.ArrayList;
        return BlackJack2.totalDeck[index];
      } // END OF getArrayCard() FUNCTION
      public void setCardCount(){
+       CardCount = 0;
        for (int cardON = 0;cardON < userHand.size(); cardON++) {
          int cardValue = getCardValue( ((Integer)userHand.elementAt(cardON)).intValue() );
          if (cardValue >= 2 && cardValue <= 6) {
@@ -150,10 +157,7 @@ import java.util.ArrayList;
        endTimeOfUserRespond = System.currentTimeMillis();
        totalTimeOfUserRespond = endTimeOfUserRespond - startTimeOfUserRespond;
 
-       // System.out.println("Number of players entered are " + numOfCompPlayers);
-
        /*********************** CREATE DECK OF CARDS ****************************/
-
        // FOR NOW I'M HARD CODING THE NUMBER OF DECKS WE ARE GOING TO USER
        // HOWEVER IT WOULD BE BETTER IF WE ADD A DECK PER TEN PLAYERS THAT ARE
        // ADDED TO THE PROGRAM
@@ -175,7 +179,7 @@ import java.util.ArrayList;
        shuffle();
        /***********************************************************************/
 
-       /****** THIS IS HERE TO SEE THAT IT PRINTS THE CORRECT NUMBER OF CARDS */
+       /**** THIS IS HERE TO SEE THAT IT PRINTS THE CORRECT NUMBER OF CARDS ****
        System.out.println(" ");
        System.out.println(" ");
        System.out.println("This is the deck of cards.");
@@ -184,6 +188,7 @@ import java.util.ArrayList;
        } // END OF FOR LOOP
        System.out.println(" ");
        System.out.println(" ");
+       */
 
        /**************** THIS IS THE PART THAT IS THREADED ********************/
        // Plus 1 because of the user
@@ -221,25 +226,15 @@ import java.util.ArrayList;
           */
        currentCardPosition = totalNumberOfPlayers * 2;
 
-       // for loop
-
+       // Only two cards have been handed out and this is only to the players.
        printPlayersHand(1);
-       /******** IN THIS SECTION OF THE PREVIOUS PROGRAM WE HAD THIS *********
-       System.out.println("2-6=+1 ....... 7-9=0 ....... 10-ACE=-1");
-       System.out.print("THIS SHOULD BE THE CARD COUNT ONCE PLAYERS HAVE TWO CARDS: ");
-       System.out.println(totalCardCount);
-       */
+
+       // Time to give the dealer his first two cards
        dealDealer(2);
 
        /************** LOGIC FOR USER HIT OR STAND OF PLAYER ******************/
        while (true) {
            System.out.println("Dealer is showing: " + showCard(getCard(dealerHand, 0)));
-           /**
-            * ***** IN THIS SECTION OF THE PREVIOUS PROGRAM WE HAD THIS ********
-            * System.out.print("THIS SHOULD BE THE CARD COUNT AFTER SEEING
-            * DEALER UPER CARD: "); System.out.println(totalCardCount);
-            * System.out.println();
-            */
 
            if (checkDealerHasBlackjack()) {
                return false;
@@ -268,8 +263,6 @@ import java.util.ArrayList;
            if (userAction == 'S') {
                // Loop ends; user is done taking cards.
                System.out.println();
-               // just incase the user hits then you would want to reset this to index 1 meaning the second card
-               // ************ COMMENTING THIS OUT ***************** this.numOfDeals = 1;
                System.out.println("User stands.");
                break;
            } else {
@@ -277,8 +270,8 @@ import java.util.ArrayList;
                // Give the user a card.  If the user goes over 21, the user loses.
                int newCard = dealCard();
                playersPlaying.get(0).getUserHand().addElement(newCard);
-               // ************ COMMENTING THIS OUT ***************** numOfDeals++;
-               // ************ COMMENTING THIS OUT ***************** setCardCount(getCard(userHand, this.numOfDeals));
+               // Since we added one card then we need to add one to number of deals
+               playersPlaying.get(0).setUserDeals(1);
                System.out.println();
 
                System.out.println("User hits.");
@@ -303,24 +296,21 @@ import java.util.ArrayList;
                move = bs.move(playersPlaying.get(playerON).getUserHand().size(), value(playersPlaying.get(playerON).getUserHand()));
                if (move.equals("S")) {
                    // You want to reset this so that the index for the next player can be on the correct card
-                   // ************ COMMENTING THIS OUT ***************** this.numOfDeals = 1;
                }
                while (move.equals("H")) {
                    int newCard = dealCard();
                    //System.out.println("Computer #" + (i + 1) + " hits and gets the " + showCard(newCard));
                    playersPlaying.get(playerON).getUserHand().addElement(newCard);
-                   // ************ COMMENTING THIS OUT ***************** numOfDeals++;
-                   // ************ COMMENTING THIS OUT ***************** setCardCount(getCard(computerPlayers.get(i), this.numOfDeals));
-                   // ************ COMMENTING THIS OUT ***************** System.out.println("The computer on is: " + (i + 1));
-                   // ************ COMMENTING THIS OUT ***************** System.out.println("number of deals: " + numOfDeals);
-                   // ************ COMMENTING THIS OUT ***************** System.out.println("total count: " + totalCardCount);
                    move = bs.move(playersPlaying.get(playerON).getUserHand().size(), value(playersPlaying.get(playerON).getUserHand()));
                }
            } else {
                blackJackWinners.add(playerON + 1);
            }
        }
-
+       // System.out.println("This is the CardCount right before counting the dealers uper Card.");
+       // System.out.println(tableCardCount);
+       // This is when the players have finsihed hitting cards and we want to
+       // see the card count including the dealers upper card
        printPlayersHand(2);
        /********* END OF LOGIC FOR COMPUTER HIT OR STAND OF PLAYER ************/
 
@@ -329,19 +319,23 @@ import java.util.ArrayList;
        /*************** END OF LOGIC FOR DEALER HIT OR STAND ******************/
        printWinners();
 
-
-
        /*********************** DONT MOVE THIS FROM HERE **********************/
        endTimeOfProgram   = System.currentTimeMillis();
        totalTimeOfProgram = endTimeOfProgram - startTimeOfProgram - totalTimeOfUserRespond;
        System.out.println("The Program took this long " + totalTimeOfProgram);
        return false;
      } //  END OF playBlackJack()
-
    public static void shuffle() {
      // Put all the used cards back into the deck, and shuffle it into
      // a random order.
+
+    /*
+    Random generator = new Random(seed);
+    double random = generator.nextDouble();
+    */
+
      for (int i = (52 * numOfDecks - 1); i > 0; i--) {
+
        int rand = (int) (Math.random() * (i + 1));
        int temp = totalDeck[i];
        totalDeck[i] = totalDeck[rand];
@@ -357,47 +351,44 @@ import java.util.ArrayList;
      }
      currentCardPosition++;
      return totalDeck[currentCardPosition - 1];
-   }
-
-
-
-
-//   for (int cardON = 0;cardON < userHand.size(); cardON++) {
-//     int cardValue = getCardValue( ((Integer)userHand.elementAt(cardON)).intValue() );
-//     if (cardValue >= 2 && cardValue <= 6) {
-//       this.CardCount++;
-//     } else if (cardValue >= 10 || cardValue == 1) {
-//       this.CardCount--;
-//     }
-//   } // END OF FOR LOOP
-//   */
-//
-//   System.out.printf("%s, ", showCard(getCard(dealerHand, cardON)));
-
-
-   public static int updateCardCount(int player, int playerType){
+   } // END OF dealCard() FUNCTION
+   public static int updateCardCount(int playerType, int player, int card) {
      if(playerType == 1){
-       // playerType 1 means an actual Player
+       // PlayerType 1 is to update the Players card Count with the first two cards only
        tableCardCount = tableCardCount + playersPlaying.get(player).getCardCount();
      } else if (playerType == 2){
+         // Playertype 2 is to update only when we know that the player has
+         // hit and this one is called from setCardCount()
+       int cardValue = getCardValue(((Integer)playersPlaying.get(player).getUserHand().elementAt(card)).intValue());
+       if (cardValue >= 2 && cardValue <= 6) {
+         tableCardCount++;
+       } else if (cardValue >= 10 || cardValue == 1) {
+         tableCardCount--;
+       } // END OF ELSE IF
+     } else if (playerType == 3){
+       // Player Type 3 is to update the cardCount in the table by using only
+       // the Dealer's faced up card
        int cardValue = getCardValue(((Integer)dealerHand.elementAt(0)).intValue());
        if (cardValue >= 2 && cardValue <= 6) {
          tableCardCount++;
        } else if (cardValue >= 10 || cardValue == 1) {
          tableCardCount--;
-       } // END ELSE IF
-     } // END ELSE IF
+       } // END LAST ELSE IF
+     } // END OF ELSE IF playerType 3 STATEMENT
      return tableCardCount;
    } // END OF updateCardCount() FUNCTION
    /* COMMENT FOR printPlayersHand()
    MAYBE SO THAT WE CAN GET EACH PLAYER CARD COUNT WE CAN PASS IT AS A
    PARAMETER */
    public static void printPlayersHand(int printNumber) {
-       // This is before they see the Dealer's upper Card
        if (printNumber == 1){
+         // This Print format is for when only the players have there first two
+         // cards before the dealer has showed the first upper card
          printFormatOne();
        } else if(printNumber == 2){
-           printFormatTwo();
+         // this print format should be once the dealer shows his first upper
+         // card and the players have deceided to hit
+          printFormatTwo();
        }
 
    } // END OF printPlayersHand() FUNCTION
@@ -418,7 +409,11 @@ import java.util.ArrayList;
        }
 
        // PRINT EACH PLAYER CARD COUNT
-       updateCardCount(playerON,1);
+       // format of updateCardCount(int playerType, int player, int card)
+       // As of now the players only have two cards and we are calling this method to update the tableCardCount
+       // PARAMETER number 100 means you dont need it.
+       updateCardCount(1,playerON,100);
+
        System.out.printf("%2d\t\t\t", tableCardCount);
        System.out.printf("%2d\t\t   ", playersPlaying.get(playerON).getCardCount());
 
@@ -442,9 +437,13 @@ import java.util.ArrayList;
      System.out.println("----------------------------------------------------------------------------------");
    }
    public static void printFormatTwo() {
-     // FIRST PARAMTER HERE DOESENT MATTER BECASUE THIS IS FOR DEALER
-     updateCardCount(1,2);
+     // WITH THE PARAMETERS THAT ARE BEING PASSED RIGHT NOW WE ARE UPDATING THE COUNT WITH THE DEALER'S UPPER CARD
+     // format of updateCardCount(int playerType, int player, int card)
 
+     // Here we are trying to update the tableCardCount for the dealers upper
+     // card only
+     // PARAMETER number 100 means you dont need it.
+     updateCardCount(3,100,100);
 
      System.out.println("");
      System.out.printf("%s %19s %24s %10s %15s", "Player", "TableCardCount", "IndividualCardCount", "Total", "Cards\n");
@@ -462,8 +461,16 @@ import java.util.ArrayList;
        }
 
        // PRINT EACH PLAYER CARD COUNT
-       updateCardCount(playerON,1);
+       // format of updateCardCount(int playerType, int player, int card)
+       //updateCardCount(playerON,2);
+       // ONLY UPDATE THE PLAYER CARD COUNT IF THE PLAYER HAS HIT CARDS
+
+       // update the tableCardCount per player
+       // first PARAMETER is the player that we ar checking against
+       // second PARAMETER is the size of the hand
+       setCardCount(playerON, playersPlaying.get(playerON).getUserHand().size());
        System.out.printf("%2d\t\t\t", tableCardCount);
+       playersPlaying.get(playerON).setCardCount();
        System.out.printf("%2d\t\t   ", playersPlaying.get(playerON).getCardCount());
 
 
@@ -632,11 +639,11 @@ import java.util.ArrayList;
    public static void dealDealer(int numberOfCardsToDeal){
      if (numberOfCardsToDeal == 2){
        // THIS IS SO THAT THE DEALER GETS HIS FIRST TWO CARDS
-       for (int numberOfCardsGiven = 0;numberOfCardsGiven < numberOfCardsToDeal; numberOfCardsGiven++) {
+       for (int numberOfCardsGiven = 0; numberOfCardsGiven < numberOfCardsToDeal; numberOfCardsGiven++) {
          dealerHand.addElement(totalDeck[currentCardPosition]);
          currentCardPosition++;
        }
-     } else{
+     } else {
        // ELSE THIS IS SO THE DEALER CAN GET ONE CARD BECASUE HE HIT
        dealerHand.addElement(totalDeck[currentCardPosition]);
        currentCardPosition++;
@@ -778,18 +785,15 @@ import java.util.ArrayList;
      } // END OF ELSE STATEMENT
      System.out.println("----------------------------------------------");
    } // END OF displayArrayOfPlayersWhoLost() FUNCTION
-
-//  public void setCardCount (int card){
-//    int cardValue = getCardValue(card);
-//
-//    // 2-6 = +1
-//    // 7-9 = 0
-//    // 10-ACE = -1
-//    if (cardValue >= 2 && cardValue <= 6) {
-//        this.totalCardCount++;
-//    } else if (cardValue >= 10 || cardValue == 1) {
-//        this.totalCardCount--;
-//    }
-//  }
-
+   // PASS IT THE (PLAYER THAT ITS ON) AND THE (NUMBER OF DEALS)
+   // THIS WILL BE TO GET THE CARD COUNT OF ONLY THE NEW CARDS THAT THEY HAVE RECIEVED
+   public static void setCardCount (int playerNumber, int sizeOfHand){
+     // this the user has more than two cards
+     if(sizeOfHand >= 3){
+       for(int cardON = 2; cardON < sizeOfHand; cardON++){
+         // format of updateCardCount(int playerType, int player, int card)
+         updateCardCount(2,playerNumber,cardON);
+       }
+     }
+   }
  } // END OF BlackJack2 CLASS
